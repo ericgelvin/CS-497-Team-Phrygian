@@ -11,12 +11,7 @@ app = Flask(__name__)
 @app.route('/data/sample', methods=['GET'])
 def get_samples():
     # https://www.kaggle.com/washingtonpost/police-shootings
-    import zipfile
-    with zipfile.ZipFile("../input/data/police-shootings.zip","r") as z:
-        z.extractall(".")   
-    from subprocess import check_output
-    print(check_output(["ls", "police-shootings"]).decode("utf8"))
-    d = pd.read_csv("police-shootings/police-shootings.csv")
+    d = pd.read_csv("./database.csv")
     d.head()
     return jsonify({'samples': d})
 
@@ -24,12 +19,29 @@ def get_samples():
 def predict():
     if not request.json:
         abort(400)
-    
-    # TODO: get finalized model or build here
-    model1 = joblib.load('./finalized_model.pkl')
-    y_pred = model1.predict(X_test)
-    return jsonify({'result': y_pred})
 
+    s = {
+        'manner_of_death':request.json['manner_of_death'],
+        'armed': request.json['armed'],
+        'age':request.json['age'] ,
+        'gender':request.json['gender'] ,
+        'race': request.json['race'],
+        'city': request.json['city'],	
+        'state': request.json['state'],
+        'signs_of_mental_illness': request.json['signs_of_mental_illness'],
+        'threat_level': request.json['threat_level'],
+        'flee': request.json['flee'],
+        'body_camera': request.json['body_camera']
+        }
+
+    #load the saved model
+    model1 = joblib.load('./model.pkl')
+    #predicting
+    x = [s['manner_of_death'],s['armed'],s['age'],s['gender'],s['race'],s['city'],s['state'],s['signs_of_mental_illness'],s['threat_level'],s['flee'],s['body_camera']]
+    x_test = pd.DataFrame(columns=['manner_of_death','armed','age','gender','race','city','state','signs_of_mental_illness','threat_level','flee','body_camera'])
+    x_test.loc[0] = x
+    y_pred = model1.predict(x_test)
+    return ' result: %s\n\n' % str(y_pred)
 
 if __name__ == '__main__':
     app.run(debug=True)

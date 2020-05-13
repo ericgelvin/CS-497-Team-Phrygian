@@ -1,0 +1,1 @@
+curl -i -H "Content-Type: application/json" -X POST -d '{"manner_of_death":0,"armed":0,"age":35,"gender":0,"race":1,"city":2,"state":2,"signs_of_mental_illness":1,"threat_level":1,"flee":0,"body_camera":1}' http://localhost:5000/predict/sample
